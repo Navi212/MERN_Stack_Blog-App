@@ -1,22 +1,34 @@
 // Entry point to App
 const express = require('express');
-const dotenv = require('dotenv');
-const connectDb = require('./config/db_connection');
+const authRouter = require('./routes/authRoute');
+const blogRouter = require('./routes/blogRoute');
+const courseRouter = require('./routes/courseRoute');
+const dsaRouter = require('./routes/dsaRoute');
+const tutorialRouter = require('./routes/tutorialRoute');
+const webTechRouter = require('./routes/webTechRoute');
+const { errorHandler } = require('./middlewares/errorHandler');
 
-// Activate access to .env file
-dotenv.config();
-
-// Connect to db
-connectDb();
-
+// Initialize app
 const app = express();
 
-const PORT = parseInt(process.env.EXPRESS_SERVER_PORT, 10) || 8001;
+// Parse json payloads
+app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello world');
-});
+// Load routers for app endpoints
+app.use('/v1/api/users', authRouter);
+app.use('/v1/api/blogs', blogRouter);
+app.use('/v1/api/courses', courseRouter);
+app.use('/v1/api/dsas', dsaRouter);
+app.use('/v1/api/tutorials', tutorialRouter); // Done
+app.use('/v1/api/webtechs', webTechRouter);
 
-app.listen(PORT, () => {
-  console.log(`Server started and running on port: ${PORT}`);
-});
+// For non existent route
+app.get('*', (req, res) =>
+  res.status(404).json({ success: false, message: 'Route does not exist' })
+);
+
+// Load custom errorHandler to catch all errors
+app.use(errorHandler);
+
+// Export app
+module.exports = app;
