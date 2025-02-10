@@ -15,8 +15,12 @@ const Tutorial = mongoose.model('Tutorial', TutorialSchema);
 const TutorialTopicSchema = new mongoose.Schema(
   {
     name: { type: String, unique: true, required: true },
-    description: { type: String },
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'TutorialTopic' },
+    description: { type: String, required: true },
+    content: { type: String, required: true },
+    tutorialTopicId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TutorialTopic' || null,
+    },
     tutorialId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tutorial' },
   },
   { timestamps: true }
