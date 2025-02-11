@@ -88,3 +88,19 @@ exports.loginUser = asyncHandler(async (req, res, next) => {
   // console.log('User logged in successfully. Token: ', token);
   return res.status(200).json({ success: true, token });
 });
+
+// Update user Role *****Have not been unit tested yet******
+exports.updateUserRole = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+  const allowedRoles = ['Admin', 'Moderator', 'User'];
+
+  if (!allowedRoles.includes(role))
+    return next(new AppError('Role is not allowed', 400));
+
+  const updatedUser = await User.findByIdAndUpdate(userId, { role });
+  if (!updatedUser)
+    return next(new AppError('Error occured updating user', 500));
+
+  return res.status(200).json({ success: true, message: 'Role updated' });
+});

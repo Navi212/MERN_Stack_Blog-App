@@ -15,8 +15,12 @@ const Dsa = mongoose.model('Dsa', DsaSchema);
 const DsaTopicSchema = new mongoose.Schema(
   {
     name: { type: String, unique: true, required: true },
-    description: { type: String },
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'DsaTopic' },
+    description: { type: String, required: true },
+    content: { type: String, required: true },
+    dsaTopicId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'DsaTopic' || null,
+    },
     dsaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dsa' },
   },
   { timestamps: true }

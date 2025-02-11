@@ -1,3 +1,5 @@
+// Checks if user is authenticated/logged in
+
 const jwt = require('jsonwebtoken');
 const util = require('util');
 const { AppError } = require('../services/errorHandler');
@@ -26,7 +28,6 @@ exports.isAuthenticated = asyncHandler(async (req, res, next) => {
     process.env.JWT_SECRET_ACCESS_TOKEN
   );
   if (!decodedToken) return next(new AppError('Invalid/No token', 401));
-  // console.log('Decoded Token = ', decodedToken);
   const user = await User.findById(decodedToken.userId);
   if (!user) return next(new AppError('Invalid/No token', 401));
   req.user = decodedToken.userId;

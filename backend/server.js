@@ -1,3 +1,4 @@
+// Server file (App entry point)
 const dotenv = require('dotenv');
 const app = require('./index');
 const connectDb = require('./config/dbConnection');
