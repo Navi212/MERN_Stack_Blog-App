@@ -12,17 +12,11 @@ const {
   createTutorial,
   createTutorialTopic,
   createTutorialSubTopic,
-  // updateTutorials,
   updateTutorial,
-  // updateTutorialTopics,
   updateTutorialTopic,
-  // updateTutorialSubTopics,
   updateTutorialSubTopic,
-  // deleteTutorials,
   deleteTutorial,
-  // deleteTutorialTopics,
   deleteTutorialTopic,
-  // deleteTutorialSubTopics,
   deleteTutorialSubTopic,
 } = require('../controllers/tutorialController');
 
@@ -45,37 +39,39 @@ router.get(
 router.post(
   '/',
   isAuthenticated,
-  isAuthorized(['SuperAdmin', 'Admin']),
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
   createTutorial
 );
+
 router.post(
   '/:tutorialId',
   isAuthenticated,
-  isAuthorized(['SuperAdmin', 'Admin']),
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
   createTutorialTopic
 );
+
 router.post(
   '/:tutorialId/topics/:topicId',
   isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
   createTutorialSubTopic
 );
 
 // Routes for PUT requests
-// router.put('/', updateTutorials); // Cannot update all Tutorials at once
 router.put(
   '/:tutorialId',
   isAuthenticated,
-  isAuthorized(['SuperAdmin', 'Admin']),
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
   updateTutorial
 );
-// router.put('/:tutorialId/topics', updateTutorialTopics); // Cannot update all Topics at once
+
 router.put(
   '/:tutorialId/topics/:topicId',
   isAuthenticated,
-  isAuthorized(['SuperAdmin', 'Admin']),
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
   updateTutorialTopic
 );
-// router.put('/:tutorialId/topics/:topicId/subtopics', updateTutorialSubTopics); // Cannot update all SubTopics at once
+
 router.put(
   '/:tutorialId/topics/:topicId/subtopics/:subtopicId',
   isAuthenticated,
@@ -84,24 +80,20 @@ router.put(
 );
 
 // Routes for DELETE requests
-// router.delete('/', deleteTutorials); // Cannot update all Tutorials at once
 router.delete(
   '/:tutorialId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin']),
   deleteTutorial
 );
-// router.delete('/:tutorialId/topics', deleteTutorialTopics); // Cannot update all Topics at once
+
 router.delete(
   '/:tutorialId/topics/:topicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin']),
   deleteTutorialTopic
 );
-// router.delete(
-//   '/:tutorialId/topics/:topicId/subtopics',
-//   deleteTutorialSubTopics
-// );
+
 router.delete(
   '/:tutorialId/topics/:topicId/subtopics/:subtopicId',
   isAuthenticated,

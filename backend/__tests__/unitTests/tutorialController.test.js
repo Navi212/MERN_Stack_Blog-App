@@ -20,14 +20,10 @@ const {
   deleteTutorialSubTopic,
 } = require('../../controllers/tutorialController');
 
-const mockData = {
-  _id: '67a673f80d036894493f387d',
-  name: 'C++',
-  description: 'Introduction to C++',
-  createdAt: '2025-02-07T20:58:32.958Z',
-  updatedAt: '2025-02-07T20:58:32.958Z',
-};
+// Mock paginationHelper module
+jest.mock('../../services/paginationHelper');
 
+// Mock req
 const mockRequest = () => ({
   query: {
     page: 2,
@@ -46,12 +42,11 @@ const mockRequest = () => ({
   },
 });
 
+// Mock res
 const mockResponse = () => ({
   status: jest.fn().mockReturnThis(),
   json: jest.fn().mockReturnThis(),
 });
-
-jest.mock('../../services/paginationHelper');
 
 // Restore all mocks after each test
 afterEach(() => {
@@ -59,6 +54,82 @@ afterEach(() => {
 });
 
 describe('Tutorial', () => {
+  const mockData = {
+    _id: '67a673f80d036894493f387d',
+    name: 'C++',
+    description: 'Introduction to C++',
+    createdAt: '2025-02-07T20:58:32.958Z',
+    updatedAt: '2025-02-07T20:58:32.958Z',
+  };
+
+  const mockTutorial = {
+    _id: '67a94cf4c0a1ddbac6e243c4',
+    name: 'MongoDB',
+    description: 'Intro',
+    createdAt: '2025-02-10T00:48:52.022Z',
+    updatedAt: '2025-02-10T00:48:52.022Z',
+  };
+
+  const mockTutorialTopic = {
+    _id: '67a561e52c798069a3a67aa7',
+    name: 'Z-Ubuntu',
+    description: 'More on Z-Ubuntu',
+    tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
+    tutorialId: '67a55ab5dbb9ddb368ff75a7',
+    createdAt: '2025-02-07T01:29:09.677Z',
+    updatedAt: '2025-02-07T01:29:09.677Z',
+  };
+
+  const mockTopics = [
+    {
+      _id: '67a55b72dbb9ddb368ff75aa',
+      name: 'Installation',
+      description: 'Installation on various OS',
+      tutorialId: '67a55ab5dbb9ddb368ff75a7',
+      createdAt: '2025-02-07T01:01:38.799Z',
+      updatedAt: '2025-02-07T01:01:38.799Z',
+    },
+    {
+      _id: '67a55c35dbb9ddb368ff75b6',
+      name: 'Installation on RedHat',
+      description: 'Installation on RedHat OS',
+      tutorialId: '67a55ab5dbb9ddb368ff75a7',
+      createdAt: '2025-02-07T01:04:53.436Z',
+      updatedAt: '2025-02-07T01:04:53.436Z',
+    },
+  ];
+
+  const mockSubtopics = [
+    {
+      _id: '67a561e52c798069a3a67aa7',
+      name: 'Z-Ubuntu',
+      description: 'More on Z-Ubuntu',
+      tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
+      tutorialId: '67a55ab5dbb9ddb368ff75a7',
+      createdAt: '2025-02-07T01:29:09.677Z',
+      updatedAt: '2025-02-07T01:29:09.677Z',
+    },
+    {
+      _id: '67a562032c798069a3a67aab',
+      name: 'J-Ubuntu',
+      description: 'More on J-Ubuntu',
+      tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
+      tutorialId: '67a55ab5dbb9ddb368ff75a7',
+      createdAt: '2025-02-07T01:29:39.595Z',
+      updatedAt: '2025-02-07T01:29:39.595Z',
+    },
+  ];
+
+  const mockSubtopic = {
+    _id: '67a561e52c798069a3a67aa7',
+    name: 'Z-Ubuntu',
+    description: 'More on Z-Ubuntu',
+    tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
+    tutorialId: '67a55ab5dbb9ddb368ff75a7',
+    createdAt: '2025-02-07T01:29:09.677Z',
+    updatedAt: '2025-02-07T01:29:09.677Z',
+  };
+
   describe('getAllTutorials', () => {
     test('Should get all tutorials', async () => {
       const mockReq = mockRequest();
@@ -144,25 +215,6 @@ describe('Tutorial', () => {
   });
 
   describe('getTutorialTopics', () => {
-    const mockTopics = [
-      {
-        _id: '67a55b72dbb9ddb368ff75aa',
-        name: 'Installation',
-        description: 'Installation on various OS',
-        tutorialId: '67a55ab5dbb9ddb368ff75a7',
-        createdAt: '2025-02-07T01:01:38.799Z',
-        updatedAt: '2025-02-07T01:01:38.799Z',
-      },
-      {
-        _id: '67a55c35dbb9ddb368ff75b6',
-        name: 'Installation on RedHat',
-        description: 'Installation on RedHat OS',
-        tutorialId: '67a55ab5dbb9ddb368ff75a7',
-        createdAt: '2025-02-07T01:04:53.436Z',
-        updatedAt: '2025-02-07T01:04:53.436Z',
-      },
-    ];
-
     test('Should throw an error on invalid tutorial Id', async () => {
       const mockReq = mockRequest();
       mockReq.params = {};
@@ -175,7 +227,7 @@ describe('Tutorial', () => {
       const [error] = next.mock.calls[0];
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId');
+      expect(error.message).toBe('Invalid/No tutorialId');
     });
 
     test('Should get the topics for a single tutorial', async () => {
@@ -217,16 +269,6 @@ describe('Tutorial', () => {
   });
 
   describe('getTutorialTopic', () => {
-    const tutorialTopic = {
-      _id: '67a561e52c798069a3a67aa7',
-      name: 'Z-Ubuntu',
-      description: 'More on Z-Ubuntu',
-      tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
-      tutorialId: '67a55ab5dbb9ddb368ff75a7',
-      createdAt: '2025-02-07T01:29:09.677Z',
-      updatedAt: '2025-02-07T01:29:09.677Z',
-    };
-
     test('Should throw an error on invalid tutorialId or topicId', async () => {
       const mockReq = mockRequest();
       delete mockReq.params.topicId;
@@ -238,7 +280,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId or topicId');
+      expect(error.message).toBe('Invalid/No tutorialId or topicId');
     });
 
     test('Should get a single topic for a tutorial', async () => {
@@ -246,13 +288,15 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
-      jest.spyOn(TutorialTopic, 'findOne').mockResolvedValueOnce(tutorialTopic);
+      jest
+        .spyOn(TutorialTopic, 'findOne')
+        .mockResolvedValueOnce(mockTutorialTopic);
 
       await getTutorialTopic(mockReq, mockRes, next);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
-        content: tutorialTopic,
+        content: mockTutorialTopic,
       });
     });
 
@@ -272,26 +316,6 @@ describe('Tutorial', () => {
   });
 
   describe('getTutorialSubTopics', () => {
-    const mockSubtopics = [
-      {
-        _id: '67a561e52c798069a3a67aa7',
-        name: 'Z-Ubuntu',
-        description: 'More on Z-Ubuntu',
-        tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
-        tutorialId: '67a55ab5dbb9ddb368ff75a7',
-        createdAt: '2025-02-07T01:29:09.677Z',
-        updatedAt: '2025-02-07T01:29:09.677Z',
-      },
-      {
-        _id: '67a562032c798069a3a67aab',
-        name: 'J-Ubuntu',
-        description: 'More on J-Ubuntu',
-        tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
-        tutorialId: '67a55ab5dbb9ddb368ff75a7',
-        createdAt: '2025-02-07T01:29:39.595Z',
-        updatedAt: '2025-02-07T01:29:39.595Z',
-      },
-    ];
     test('Should throw an error on invalid tutorialId or topicId', async () => {
       const mockReq = mockRequest();
       mockReq.params = {};
@@ -345,16 +369,6 @@ describe('Tutorial', () => {
   });
 
   describe('getTutorialSubTopic', () => {
-    mockSubtopic = {
-      _id: '67a561e52c798069a3a67aa7',
-      name: 'Z-Ubuntu',
-      description: 'More on Z-Ubuntu',
-      tutorialTopicId: '67a55c18dbb9ddb368ff75ae',
-      tutorialId: '67a55ab5dbb9ddb368ff75a7',
-      createdAt: '2025-02-07T01:29:09.677Z',
-      updatedAt: '2025-02-07T01:29:09.677Z',
-    };
-
     test('Should throw an error on invalid tutorialId/topicId/subtopicId', async () => {
       const mockReq = mockRequest();
       mockReq.params = {};
@@ -366,7 +380,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId/topicId/subtopicId');
+      expect(error.message).toBe('Invalid/No tutorialId/topicId/subtopicId');
     });
 
     test('Should get a single subtopic of a tutorial topic', async () => {
@@ -431,7 +445,7 @@ describe('Tutorial', () => {
       jest.spyOn(Tutorial, 'create').mockResolvedValueOnce(mockCreatedTutorial);
 
       await createTutorial(mockReq, mockRes, next);
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
         message: 'Tutorial created',
@@ -524,7 +538,7 @@ describe('Tutorial', () => {
 
       await createTutorialTopic(mockReq, mockRes, next);
 
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
         message: 'Tutorial topic created',
@@ -613,7 +627,7 @@ describe('Tutorial', () => {
         .mockResolvedValueOnce(mockCreateSubtopic);
 
       await createTutorialSubTopic(mockReq, mockRes, next);
-      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
         message: 'Tutorial subtopic created',
@@ -641,7 +655,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId');
+      expect(error.message).toBe('Invalid/No tutorialId');
     });
 
     test('Should throw an error on update error', async () => {
@@ -698,7 +712,22 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId/topicId');
+      expect(error.message).toBe('Invalid/No tutorialId/topicId');
+    });
+
+    test('Should throw an error if no tutorial found', async () => {
+      const mockReq = mockRequest();
+      const mockRes = mockResponse();
+      const next = jest.fn();
+
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(null);
+
+      await updateTutorialTopic(mockReq, mockRes, next);
+      const [error] = next.mock.calls[0];
+
+      expect(next).toHaveBeenCalledWith(expect.any(AppError));
+      expect(error.statusCode).toBe(404);
+      expect(error.message).toBe('No tutorial found');
     });
 
     test('Should throw an error on update error', async () => {
@@ -706,6 +735,7 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
       jest
         .spyOn(TutorialTopic, 'findByIdAndUpdate')
         .mockResolvedValueOnce(null);
@@ -723,6 +753,7 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
       jest
         .spyOn(TutorialTopic, 'findByIdAndUpdate')
         .mockResolvedValueOnce(mockUpdatedTopic);
@@ -763,11 +794,31 @@ describe('Tutorial', () => {
       expect(error.message).toBe('Invalid tutorialId/topicId/subtopicId');
     });
 
+    test('Should throw an error when tutorial and topic doesnt exist', async () => {
+      const mockReq = mockRequest();
+      const mockRes = mockResponse();
+      const next = jest.fn();
+
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(null);
+      jest.spyOn(TutorialTopic, 'findById').mockResolvedValueOnce(null);
+
+      await updateTutorialSubTopic(mockReq, mockRes, next);
+      const [error] = next.mock.calls[0];
+
+      expect(next).toHaveBeenCalledWith(expect.any(AppError));
+      expect(error.statusCode).toBe(404);
+      expect(error.message).toBe('No tutorial and topic found');
+    });
+
     test('Should throw an error on update error', async () => {
       const mockReq = mockRequest();
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
+      jest
+        .spyOn(TutorialTopic, 'findById')
+        .mockResolvedValueOnce(mockTutorialTopic);
       jest
         .spyOn(TutorialTopic, 'findByIdAndUpdate')
         .mockResolvedValueOnce(null);
@@ -785,6 +836,10 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
+      jest
+        .spyOn(TutorialTopic, 'findById')
+        .mockResolvedValueOnce(mockTutorialTopic);
       jest
         .spyOn(TutorialTopic, 'findByIdAndUpdate')
         .mockResolvedValueOnce(mockUpdatedSubtopic);
@@ -870,11 +925,27 @@ describe('Tutorial', () => {
       expect(error.message).toBe('Invalid tutorialId/topicId');
     });
 
+    test('Should throw error when no tutorial found', async () => {
+      const mockReq = mockDeleteRequest();
+      const mockRes = mockResponse();
+      const next = jest.fn();
+
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(null);
+
+      await deleteTutorialTopic(mockReq, mockRes, next);
+      const [error] = next.mock.calls[0];
+
+      expect(next).toHaveBeenCalledWith(expect.any(AppError));
+      expect(error.statusCode).toBe(404);
+      expect(error.message).toBe('No tutorial found');
+    });
+
     test('Should throw error on delete error', async () => {
       const mockReq = mockDeleteRequest();
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
       jest
         .spyOn(TutorialTopic, 'findByIdAndDelete')
         .mockResolvedValueOnce(false);
@@ -892,6 +963,7 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
       jest
         .spyOn(TutorialTopic, 'findByIdAndDelete')
         .mockResolvedValueOnce(true);
@@ -927,11 +999,31 @@ describe('Tutorial', () => {
       expect(error.message).toBe('Invalid tutorialId/topicId/subtopicId');
     });
 
+    test('Should throw error when tutorial and topic doesnt exist', async () => {
+      const mockReq = mockDeleteRequest();
+      const mockRes = mockResponse();
+      const next = jest.fn();
+
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(null);
+      jest.spyOn(TutorialTopic, 'findById').mockResolvedValueOnce(null);
+
+      await deleteTutorialSubTopic(mockReq, mockRes, next);
+      const [error] = next.mock.calls[0];
+
+      expect(next).toHaveBeenCalledWith(expect.any(AppError));
+      expect(error.statusCode).toBe(404);
+      expect(error.message).toBe('No tutorial and topic found');
+    });
+
     test('Should throw error on delete error', async () => {
       const mockReq = mockDeleteRequest();
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
+      jest
+        .spyOn(TutorialTopic, 'findById')
+        .mockResolvedValueOnce(mockTutorialTopic);
       jest
         .spyOn(TutorialTopic, 'findByIdAndDelete')
         .mockResolvedValueOnce(false);
@@ -949,6 +1041,10 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(mockTutorial);
+      jest
+        .spyOn(TutorialTopic, 'findById')
+        .mockResolvedValueOnce(mockTutorialTopic);
       jest
         .spyOn(TutorialTopic, 'findByIdAndDelete')
         .mockResolvedValueOnce(true);

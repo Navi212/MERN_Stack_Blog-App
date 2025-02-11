@@ -1,3 +1,5 @@
+// Checks if user is authorized
+
 const jwt = require('jsonwebtoken');
 const util = require('util');
 

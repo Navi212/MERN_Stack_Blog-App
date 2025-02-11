@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "prod": "node server.js",
-    "test": "jest"
+    "test": "jest --watchAll"
   },
   "keywords": [],
   "author": "",
