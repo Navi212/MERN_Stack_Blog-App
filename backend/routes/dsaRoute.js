@@ -20,6 +20,13 @@ const {
   deleteDsaSubTopic,
 } = require('../controllers/dsaController');
 
+// Input validation middleware and schemas
+const {
+  dsaSchema,
+  dsaTopicSchema,
+  validateInputs,
+} = require('../middlewares/validators/inputValidator');
+
 // isAuthenticated and isAuthorized middlewares
 const { isAuthenticated } = require('../middlewares/isAuthenticated');
 const { isAuthorized } = require('../middlewares/isAuthorized');
@@ -37,6 +44,7 @@ router.post(
   '/',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', dsaSchema),
   createDsa
 );
 
@@ -44,6 +52,7 @@ router.post(
   '/:dsaId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', dsaTopicSchema),
   createDsaTopic
 );
 
@@ -51,6 +60,7 @@ router.post(
   '/:dsaId/topics/:topicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', dsaTopicSchema),
   createDsaSubTopic
 );
 
@@ -59,6 +69,7 @@ router.put(
   '/:dsaId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', dsaSchema),
   updateDsa
 );
 
@@ -66,6 +77,7 @@ router.put(
   '/:dsaId/topics/:topicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', dsaTopicSchema),
   updateDsaTopic
 );
 
@@ -73,6 +85,7 @@ router.put(
   '/:dsaId/topics/:topicId/subtopics/:subtopicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', dsaTopicSchema),
   updateDsaSubTopic
 );
 

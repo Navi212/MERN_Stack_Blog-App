@@ -2,23 +2,23 @@
 const mongoose = require('mongoose');
 
 // Web Technologies model
-const webTechSchema = new mongoose.Schema({
+const WebTechSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
   description: { type: String },
 });
-const webTech = mongoose.model('webTech', webTechSchema);
+const WebTech = mongoose.model('WebTech', WebTechSchema);
 
 // Web Technologies Topics model
-const webTechTopicsSchema = new mongoose.Schema({
+const WebTechTopicsSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
   description: { type: String },
-  parent: { type: mongoose.Schema.Types.ObjectId, ref: 'webTechTopic' },
-  webTechNameId: { type: mongoose.Schema.Types.ObjectId, ref: 'webTech' },
+  webTechTopicId: { type: mongoose.Schema.Types.ObjectId, ref: 'WebTechTopic' },
+  webTechId: { type: mongoose.Schema.Types.ObjectId, ref: 'WebTech' },
 });
 
-const webTechTopic = mongoose.model('webTechTopic', webTechTopicsSchema);
+const WebTechTopic = mongoose.model('WebTechTopic', WebTechTopicsSchema);
 
 module.exports = {
-  webTech,
-  webTechTopic,
+  WebTech,
+  WebTechTopic,
 };

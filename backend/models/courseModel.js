@@ -15,8 +15,12 @@ const Course = mongoose.model('Course', CourseSchema);
 const CourseTopicSchema = new mongoose.Schema(
   {
     name: { type: String, unique: true, required: true },
-    description: { type: String },
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'CourseTopic' },
+    description: { type: String, required: true },
+    content: { type: String, required: true },
+    courseTopicId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CourseTopic' || null,
+    },
     courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
   },
   { timestamps: true }

@@ -1,5 +1,6 @@
 // Tutorial controller
 const { asyncHandler, AppError } = require('../services/errorHandler');
+const { isValidObjectId } = require('../services/validateMongoObjectId');
 const { Tutorial, TutorialTopic } = require('../models/tutorialModel');
 const { paginationHelper } = require('../services/paginationHelper');
 
@@ -19,7 +20,8 @@ exports.getAllTutorials = asyncHandler(async (req, res, next) => {
 exports.getTutorial = asyncHandler(async (req, res, next) => {
   const { tutorialId } = req.params;
 
-  if (!tutorialId) return next(new AppError('Invalid tutorialId', 400));
+  if (!tutorialId || !isValidObjectId(tutorialId))
+    return next(new AppError('Invalid/Missing tutorialId', 400));
 
   const tutorial = await Tutorial.findById(tutorialId);
   if (!tutorial) return next(new AppError('No tutorial found', 404));
@@ -32,7 +34,8 @@ exports.getTutorialTopics = asyncHandler(async (req, res, next) => {
   const { resultPerPage, skip } = paginationHelper(req);
   const { tutorialId } = req.params;
 
-  if (!tutorialId) return next(new AppError('Invalid/No tutorialId', 400));
+  if (!tutorialId || !isValidObjectId(tutorialId))
+    return next(new AppError('Invalid/Missing tutorialId', 400));
 
   const topics = await TutorialTopic.find({ tutorialId })
     .limit(resultPerPage)
@@ -46,8 +49,8 @@ exports.getTutorialTopics = asyncHandler(async (req, res, next) => {
 exports.getTutorialTopic = asyncHandler(async (req, res, next) => {
   const { tutorialId, topicId } = req.params;
 
-  if (!tutorialId || !topicId)
-    return next(new AppError('Invalid/No tutorialId or topicId', 400));
+  if (!tutorialId || !topicId || !isValidObjectId(tutorialId, topicId))
+    return next(new AppError('Invalid/Missing tutorialId/topicId', 400));
 
   const topic = await TutorialTopic.findOne({
     tutorialId,
@@ -63,8 +66,8 @@ exports.getTutorialSubTopics = asyncHandler(async (req, res, next) => {
   const { resultPerPage, skip } = paginationHelper(req);
   const { tutorialId, topicId } = req.params;
 
-  if (!tutorialId || !topicId)
-    return next(new AppError('Invalid tutorialId or topicId', 400));
+  if (!tutorialId || !topicId || !isValidObjectId(tutorialId, topicId))
+    return next(new AppError('Invalid/Missing tutorialId/topicId', 400));
 
   const subTopics = await TutorialTopic.find({
     tutorialId,
@@ -82,8 +85,15 @@ exports.getTutorialSubTopics = asyncHandler(async (req, res, next) => {
 exports.getTutorialSubTopic = asyncHandler(async (req, res, next) => {
   const { tutorialId, topicId, subtopicId } = req.params;
 
-  if (!tutorialId || !topicId || !subtopicId)
-    return next(new AppError('Invalid/No tutorialId/topicId/subtopicId', 400));
+  if (
+    !tutorialId ||
+    !topicId ||
+    !subtopicId ||
+    !isValidObjectId(tutorialId, topicId, subtopicId)
+  )
+    return next(
+      new AppError('Invalid/Missing tutorialId/topicId/subtopicId', 400)
+    );
 
   const subTopic = await TutorialTopic.findOne({
     tutorialId,
@@ -100,7 +110,7 @@ exports.createTutorial = asyncHandler(async (req, res, next) => {
   const { name, description } = req.body;
 
   if (!name || !description)
-    return next(new AppError('Tutorial name or description missing', 400));
+    return next(new AppError('Invalid/Missing Tutorial name/description', 400));
 
   const tutorial = await Tutorial.create({ name, description });
   if (!tutorial)
@@ -114,9 +124,12 @@ exports.createTutorialTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { tutorialId } = req.params;
 
-  if (!name || !description || !content)
+  if (!name || !description || !content || !isValidObjectId(tutorialId))
     return next(
-      new AppError('Tutorial topic name/description/content missing', 400)
+      new AppError(
+        'Invalid/Missing Tutorial topic name/description/content',
+        400
+      )
     );
 
   const existsTutorial = await Tutorial.findById(tutorialId);
@@ -142,14 +155,25 @@ exports.createTutorialSubTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { tutorialId, topicId } = req.params;
 
-  if (!name || !description || !content)
+  if (
+    !name ||
+    !description ||
+    !content ||
+    !isValidObjectId(tutorialId, topicId)
+  )
     return next(
-      new AppError('Tutorial subtopic name/description/content missing', 400)
+      new AppError(
+        'Invalid/Missing Tutorial subtopic name/description/content',
+        400
+      )
     );
 
-  const existsTutorial = await Tutorial.findById(tutorialId);
-  const existsTutorialTopic = await TutorialTopic.findById(topicId);
-  if (!existsTutorial || !existsTutorialTopic)
+  // const existsTutorial = await Tutorial.findById(tutorialId);
+  const existsTutorialTopic = await TutorialTopic.findOne({
+    topicId,
+    tutorialId,
+  });
+  if (!existsTutorialTopic)
     return next(new AppError('Tutorial or Topic does not exist', 404));
 
   const subTopic = await TutorialTopic.create({
@@ -172,7 +196,8 @@ exports.updateTutorial = asyncHandler(async (req, res, next) => {
   const { name, description } = req.body;
   const { tutorialId } = req.params;
 
-  if (!tutorialId) return next(new AppError('Invalid/No tutorialId', 400));
+  if (!tutorialId || !isValidObjectId(tutorialId))
+    return next(new AppError('Invalid/Missing tutorialId', 400));
 
   const updatedTutorial = await Tutorial.findByIdAndUpdate(tutorialId, {
     name,
@@ -189,8 +214,8 @@ exports.updateTutorialTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { tutorialId, topicId } = req.params;
 
-  if (!tutorialId || !topicId)
-    return next(new AppError('Invalid/No tutorialId/topicId', 400));
+  if (!tutorialId || !topicId || !isValidObjectId(tutorialId, topicId))
+    return next(new AppError('Invalid/Missing tutorialId/topicId', 400));
 
   const tutorial = await Tutorial.findById(tutorialId);
   if (!tutorial) return next(new AppError('No tutorial found', 404));
@@ -210,8 +235,15 @@ exports.updateTutorialSubTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { tutorialId, topicId, subtopicId } = req.params;
 
-  if (!tutorialId || !topicId || !subtopicId)
-    return next(new AppError('Invalid tutorialId/topicId/subtopicId', 400));
+  if (
+    !tutorialId ||
+    !topicId ||
+    !subtopicId ||
+    !isValidObjectId(tutorialId, topicId, subtopicId)
+  )
+    return next(
+      new AppError('Invalid/Missing tutorialId/topicId/subtopicId', 400)
+    );
 
   const tutorial = await Tutorial.findById(tutorialId);
   const topic = await TutorialTopic.findById(topicId);
@@ -233,7 +265,8 @@ exports.updateTutorialSubTopic = asyncHandler(async (req, res, next) => {
 exports.deleteTutorial = asyncHandler(async (req, res, next) => {
   const { tutorialId } = req.params;
 
-  if (!tutorialId) return next(new AppError('Invalid tutorialId', 400));
+  if (!tutorialId || !isValidObjectId(tutorialId))
+    return next(new AppError('Invalid/Missing tutorialId', 400));
 
   const deletedTutorial = await Tutorial.findByIdAndDelete(tutorialId);
   if (!deletedTutorial)
@@ -246,8 +279,8 @@ exports.deleteTutorial = asyncHandler(async (req, res, next) => {
 exports.deleteTutorialTopic = asyncHandler(async (req, res, next) => {
   const { tutorialId, topicId } = req.params;
 
-  if (!tutorialId || !topicId)
-    return next(new AppError('Invalid tutorialId/topicId', 400));
+  if (!tutorialId || !topicId || !isValidObjectId(tutorialId, topicId))
+    return next(new AppError('Invalid/Missing tutorialId/topicId', 400));
 
   const tutorial = await Tutorial.findById(tutorialId);
   if (!tutorial) return next(new AppError('No tutorial found', 404));
@@ -263,8 +296,15 @@ exports.deleteTutorialTopic = asyncHandler(async (req, res, next) => {
 exports.deleteTutorialSubTopic = asyncHandler(async (req, res, next) => {
   const { tutorialId, topicId, subtopicId } = req.params;
 
-  if (!tutorialId || !topicId || !subtopicId)
-    return next(new AppError('Invalid tutorialId/topicId/subtopicId', 400));
+  if (
+    !tutorialId ||
+    !topicId ||
+    !subtopicId ||
+    !isValidObjectId(tutorialId, topicId, subtopicId)
+  )
+    return next(
+      new AppError('Invalid/Missing tutorialId/topicId/subtopicId', 400)
+    );
 
   const tutorial = await Tutorial.findById(tutorialId);
   const topic = await TutorialTopic.findById(topicId);

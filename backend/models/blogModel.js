@@ -6,11 +6,12 @@ const CategorySchema = new mongoose.Schema(
   {
     name: { type: String, unique: true, required: true },
     description: { type: String },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
 
-const Category = mongoose.model('Category', CategorySchema);
+exports.Category = mongoose.model('Category', CategorySchema);
 
 // Post model
 const PostSchema = new mongoose.Schema(
@@ -25,33 +26,28 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Post = mongoose.model('Post', PostSchema);
+exports.Post = mongoose.model('Post', PostSchema);
 
 // Comment model
 const CommentSchema = new mongoose.Schema(
   {
     comment: { type: String, required: true },
-    postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
-  },
-  { timestamps: true }
-);
-
-const Comment = mongoose.model('Comment', CommentSchema);
-
-// Like model
-const LikeSchema = new mongoose.Schema(
-  {
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
     commentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' },
   },
   { timestamps: true }
 );
 
-const Like = mongoose.model('Like', LikeSchema);
+exports.Comment = mongoose.model('Comment', CommentSchema);
 
-module.exports = {
-  Category,
-  Post,
-  Comment,
-  Like,
-};
+// Like model
+const LikeSchema = new mongoose.Schema(
+  {
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+    postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+  },
+  { timestamps: true }
+);
+
+exports.Like = mongoose.model('Like', LikeSchema);

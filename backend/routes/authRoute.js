@@ -12,6 +12,10 @@ const {
 
 const { isAuthenticated } = require('../middlewares/isAuthenticated');
 const { isAuthorized } = require('../middlewares/isAuthorized');
+const {
+  validateInputs,
+  userSchema,
+} = require('../middlewares/validators/inputValidator');
 
 // Routes for POST requests
 router.post('/login', loginUser);
@@ -23,6 +27,7 @@ router.put(
   '/update',
   isAuthenticated,
   isAuthorized(['SuperAdmin']),
+  validateInputs('PUT', userSchema),
   updateUserRole
 );
 

@@ -20,6 +20,13 @@ const {
   deleteTutorialSubTopic,
 } = require('../controllers/tutorialController');
 
+// Input validation middleware and schemas
+const {
+  tutorialSchema,
+  tutorialTopicSchema,
+  validateInputs,
+} = require('../middlewares/validators/inputValidator');
+
 // isAuthenticated and isAuthorized middlewares
 const { isAuthenticated } = require('../middlewares/isAuthenticated');
 const { isAuthorized } = require('../middlewares/isAuthorized');
@@ -40,6 +47,7 @@ router.post(
   '/',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', tutorialSchema),
   createTutorial
 );
 
@@ -47,6 +55,7 @@ router.post(
   '/:tutorialId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', tutorialTopicSchema),
   createTutorialTopic
 );
 
@@ -54,6 +63,7 @@ router.post(
   '/:tutorialId/topics/:topicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', tutorialTopicSchema),
   createTutorialSubTopic
 );
 
@@ -62,6 +72,7 @@ router.put(
   '/:tutorialId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', tutorialSchema),
   updateTutorial
 );
 
@@ -69,6 +80,7 @@ router.put(
   '/:tutorialId/topics/:topicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', tutorialTopicSchema),
   updateTutorialTopic
 );
 
@@ -76,6 +88,7 @@ router.put(
   '/:tutorialId/topics/:topicId/subtopics/:subtopicId',
   isAuthenticated,
   isAuthorized(['SuperAdmin', 'Admin']),
+  validateInputs('PUT', tutorialTopicSchema),
   updateTutorialSubTopic
 );
 
