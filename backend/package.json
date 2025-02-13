@@ -17,9 +17,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.7",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "sanitize-html": "^2.14.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

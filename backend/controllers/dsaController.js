@@ -1,5 +1,6 @@
 // Data Structures and Algorithm (DSA) controller
 const { asyncHandler, AppError } = require('../services/errorHandler');
+const { isValidObjectId } = require('../services/validateMongoObjectId');
 const { Dsa, DsaTopic } = require('../models/dsaModel');
 const { paginationHelper } = require('../services/paginationHelper');
 
@@ -19,7 +20,8 @@ exports.getAllDsas = asyncHandler(async (req, res, next) => {
 exports.getDsa = asyncHandler(async (req, res, next) => {
   const { dsaId } = req.params;
 
-  if (!dsaId) return next(new AppError('Invalid dsaId', 400));
+  if (!dsaId || !isValidObjectId(dsaId))
+    return next(new AppError('Invalid/Missing dsaId', 400));
 
   const dsa = await Dsa.findById(dsaId);
   if (!dsa) return next(new AppError('No dsa found', 404));
@@ -32,7 +34,8 @@ exports.getDsaTopics = asyncHandler(async (req, res, next) => {
   const { resultPerPage, skip } = paginationHelper(req);
   const { dsaId } = req.params;
 
-  if (!dsaId) return next(new AppError('Invalid/No dsaId', 400));
+  if (!dsaId || !isValidObjectId(dsaId))
+    return next(new AppError('Invalid/Missing dsaId', 400));
 
   const topics = await DsaTopic.find({ dsaId }).limit(resultPerPage).skip(skip);
   if (!topics) return next(new AppError('No topics found', 404));
@@ -44,8 +47,8 @@ exports.getDsaTopics = asyncHandler(async (req, res, next) => {
 exports.getDsaTopic = asyncHandler(async (req, res, next) => {
   const { dsaId, topicId } = req.params;
 
-  if (!dsaId || !topicId)
-    return next(new AppError('Invalid/No dsaId or topicId', 400));
+  if (!dsaId || !topicId || !isValidObjectId(dsaId, topicId))
+    return next(new AppError('Invalid/Missing dsaId/topicId', 400));
 
   const topic = await DsaTopic.findOne({
     dsaId,
@@ -61,8 +64,8 @@ exports.getDsaSubTopics = asyncHandler(async (req, res, next) => {
   const { resultPerPage, skip } = paginationHelper(req);
   const { dsaId, topicId } = req.params;
 
-  if (!dsaId || !topicId)
-    return next(new AppError('Invalid dsaId or topicId', 400));
+  if (!dsaId || !topicId || !isValidObjectId(dsaId, topicId))
+    return next(new AppError('Invalid/Missing dsaId/topicId', 400));
 
   const subTopics = await DsaTopic.find({
     dsaId,
@@ -80,8 +83,13 @@ exports.getDsaSubTopics = asyncHandler(async (req, res, next) => {
 exports.getDsaSubTopic = asyncHandler(async (req, res, next) => {
   const { dsaId, topicId, subtopicId } = req.params;
 
-  if (!dsaId || !topicId || !subtopicId)
-    return next(new AppError('Invalid/No dsaId/topicId/subtopicId', 400));
+  if (
+    !dsaId ||
+    !topicId ||
+    !subtopicId ||
+    !isValidObjectId(dsaId, topicId, subtopicId)
+  )
+    return next(new AppError('Invalid/Missing dsaId/topicId/subtopicId', 400));
 
   const subTopic = await DsaTopic.findOne({
     dsaId,
@@ -98,7 +106,7 @@ exports.createDsa = asyncHandler(async (req, res, next) => {
   const { name, description } = req.body;
 
   if (!name || !description)
-    return next(new AppError('Dsa name or description missing', 400));
+    return next(new AppError('Invalid/Missing Dsa name/description', 400));
 
   const dsa = await Dsa.create({ name, description });
   if (!dsa) return next(new AppError('Error occured creating Dsa', 500));
@@ -111,9 +119,12 @@ exports.createDsaTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { dsaId } = req.params;
 
-  if (!name || !description || !content)
+  if (!name || !description || !content || !isValidObjectId(dsaId))
     return next(
-      new AppError('Dsa topic name/description/content missing', 400)
+      new AppError(
+        'Invalid/Missing Dsa topic name/description/content/dsaId',
+        400
+      )
     );
 
   const existsDsa = await Dsa.findById(dsaId);
@@ -136,9 +147,12 @@ exports.createDsaSubTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { dsaId, topicId } = req.params;
 
-  if (!name || !description || !content)
+  if (!name || !description || !content || !isValidObjectId(dsaId, topicId))
     return next(
-      new AppError('Dsa subtopic name/description/content missing', 400)
+      new AppError(
+        'Invalid/Missing Dsa subtopic name/description/content/dsaId/opicId',
+        400
+      )
     );
 
   const existsDsa = await Dsa.findById(dsaId);
@@ -166,7 +180,8 @@ exports.updateDsa = asyncHandler(async (req, res, next) => {
   const { name, description } = req.body;
   const { dsaId } = req.params;
 
-  if (!dsaId) return next(new AppError('Invalid/No dsaId', 400));
+  if (!dsaId || !isValidObjectId(dsaId))
+    return next(new AppError('Invalid/Missing dsaId', 400));
 
   const updatedDsa = await Dsa.findByIdAndUpdate(dsaId, {
     name,
@@ -182,8 +197,8 @@ exports.updateDsaTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { dsaId, topicId } = req.params;
 
-  if (!dsaId || !topicId)
-    return next(new AppError('Invalid/No dsaId/topicId', 400));
+  if (!dsaId || !topicId || !isValidObjectId(dsaId, topicId))
+    return next(new AppError('Invalid/Missing dsaId/topicId', 400));
 
   const dsa = await Dsa.findById(dsaId);
   if (!dsa) return next(new AppError('No dsa found', 404));
@@ -203,8 +218,13 @@ exports.updateDsaSubTopic = asyncHandler(async (req, res, next) => {
   const { name, description, content } = req.body;
   const { dsaId, topicId, subtopicId } = req.params;
 
-  if (!dsaId || !topicId || !subtopicId)
-    return next(new AppError('Invalid dsaId/topicId/subtopicId', 400));
+  if (
+    !dsaId ||
+    !topicId ||
+    !subtopicId ||
+    !isValidObjectId(dsaId, topicId, subtopicId)
+  )
+    return next(new AppError('Invalid/Missing dsaId/topicId/subtopicId', 400));
 
   const dsa = await Dsa.findById(dsaId);
   const topic = await DsaTopic.findById(topicId);
@@ -225,7 +245,8 @@ exports.updateDsaSubTopic = asyncHandler(async (req, res, next) => {
 exports.deleteDsa = asyncHandler(async (req, res, next) => {
   const { dsaId } = req.params;
 
-  if (!dsaId) return next(new AppError('Invalid dsaId', 400));
+  if (!dsaId || !isValidObjectId(dsaId))
+    return next(new AppError('Invalid/Missing dsaId', 400));
 
   const deletedDsa = await Dsa.findByIdAndDelete(dsaId);
   if (!deletedDsa) return next(new AppError('Error occured deleting Dsa', 500));
@@ -237,8 +258,8 @@ exports.deleteDsa = asyncHandler(async (req, res, next) => {
 exports.deleteDsaTopic = asyncHandler(async (req, res, next) => {
   const { dsaId, topicId } = req.params;
 
-  if (!dsaId || !topicId)
-    return next(new AppError('Invalid dsaId/topicId', 400));
+  if (!dsaId || !topicId || !isValidObjectId(dsaId, topicId))
+    return next(new AppError('Invalid/Missing dsaId/topicId', 400));
 
   const dsa = await Dsa.findById(dsaId);
   if (!dsa) return next(new AppError('No dsa found', 404));
@@ -254,8 +275,13 @@ exports.deleteDsaTopic = asyncHandler(async (req, res, next) => {
 exports.deleteDsaSubTopic = asyncHandler(async (req, res, next) => {
   const { dsaId, topicId, subtopicId } = req.params;
 
-  if (!dsaId || !topicId || !subtopicId)
-    return next(new AppError('Invalid dsaId/topicId/subtopicId', 400));
+  if (
+    !dsaId ||
+    !topicId ||
+    !subtopicId ||
+    !isValidObjectId(dsaId, topicId, subtopicId)
+  )
+    return next(new AppError('Invalid/Missing dsaId/topicId/subtopicId', 400));
 
   const dsa = await Dsa.findById(dsaId);
   const topic = await DsaTopic.findById(topicId);

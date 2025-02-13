@@ -19,7 +19,7 @@ app.use('/v1/api/users', authRouter);
 app.use('/v1/api/blogs', blogRouter);
 app.use('/v1/api/courses', courseRouter);
 app.use('/v1/api/dsas', dsaRouter);
-app.use('/v1/api/tutorials', tutorialRouter); // Done
+app.use('/v1/api/tutorials', tutorialRouter);
 app.use('/v1/api/webtechs', webTechRouter);
 
 // For non existent route

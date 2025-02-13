@@ -1,5 +1,7 @@
-// Api route for Courses
-const router = require('express').Router();
+// Api route for Data Structures and Algorithms (DSA's)
+const express = require('express');
+
+const router = express.Router();
 const {
   getAllCourses,
   getCourse,
@@ -10,19 +12,23 @@ const {
   createCourse,
   createCourseTopic,
   createCourseSubTopic,
-  updateCourses,
   updateCourse,
-  updateCourseTopics,
   updateCourseTopic,
-  updateCourseSubTopics,
   updateCourseSubTopic,
-  deleteCourses,
   deleteCourse,
-  deleteCourseTopics,
   deleteCourseTopic,
-  deleteCourseSubTopics,
   deleteCourseSubTopic,
 } = require('../controllers/courseController');
+// Input validation middleware and schemas
+const {
+  courseSchema,
+  courseTopicSchema,
+  validateInputs,
+} = require('../middlewares/validators/inputValidator');
+
+// isAuthenticated and isAuthorized middlewares
+const { isAuthenticated } = require('../middlewares/isAuthenticated');
+const { isAuthorized } = require('../middlewares/isAuthorized');
 
 // Routes for GET requests
 router.get('/', getAllCourses);
@@ -36,29 +42,74 @@ router.get(
 );
 
 // Routes for POST requests
-router.post('/', createCourse);
-router.post('/:courseId', createCourseTopic);
-router.post('/:courseId/topics/:topicId', createCourseSubTopic);
+router.post(
+  '/',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', courseSchema),
+  createCourse
+);
+
+router.post(
+  '/:courseId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', courseTopicSchema),
+  createCourseTopic
+);
+
+router.post(
+  '/:courseId/topics/:topicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', courseTopicSchema),
+  createCourseSubTopic
+);
 
 // Routes for PUT requests
-router.put('/', updateCourses);
-router.put('/:courseId', updateCourse);
-router.put('/:courseId/topics', updateCourseTopics);
-router.put('/:courseId/topics/:topicId', updateCourseTopic);
-router.put('/:courseId/topics/:topicId/subtopics', updateCourseSubTopics);
+router.put(
+  '/:courseId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', courseSchema),
+  updateCourse
+);
+
+router.put(
+  '/:courseId/topics/:topicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', courseTopicSchema),
+  updateCourseTopic
+);
+
 router.put(
   '/:courseId/topics/:topicId/subtopics/:subtopicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', courseTopicSchema),
   updateCourseSubTopic
 );
 
 // Routes for DELETE requests
-router.delete('/', deleteCourses);
-router.delete('/:courseId', deleteCourse);
-router.delete('/:courseId/topics', deleteCourseTopics);
-router.delete('/:courseId/topics/:topicId', deleteCourseTopic);
-router.delete('/:courseId/topics/:topicId/subtopics', deleteCourseSubTopics);
+router.delete(
+  '/:courseId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin']),
+  deleteCourse
+);
+
+router.delete(
+  '/:courseId/topics/:topicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin']),
+  deleteCourseTopic
+);
+
 router.delete(
   '/:courseId/topics/:topicId/subtopics/:subtopicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin']),
   deleteCourseSubTopic
 );
 

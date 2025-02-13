@@ -8,21 +8,26 @@ const {
   getWebTechSubTopics,
   getWebTechSubTopic,
   createWebTech,
-  createwebTechTopic,
-  createwebTechSubTopic,
-  updateWebTechs,
+  createWebTechTopic,
+  createWebTechSubTopic,
   updateWebTech,
-  updateWebTechTopics,
   updateWebTechTopic,
-  updateWebTechSubTopics,
   updateWebTechSubTopic,
-  deleteWebTechs,
   deleteWebTech,
-  deleteWebTechTopics,
   deleteWebTechTopic,
-  deleteWebTechSubTopics,
   deleteWebTechSubTopic,
 } = require('../controllers/webTechController');
+
+// Input validation middleware and schemas
+const {
+  webTechSchema,
+  webTechTopicSchema,
+  validateInputs,
+} = require('../middlewares/validators/inputValidator');
+
+// isAuthenticated and isAuthorized middlewares
+const { isAuthenticated } = require('../middlewares/isAuthenticated');
+const { isAuthorized } = require('../middlewares/isAuthorized');
 
 // Routes for GET requests
 router.get('/', getAllWebTechs);
@@ -36,29 +41,74 @@ router.get(
 );
 
 // Routes for POST requests
-router.post('/', createWebTech);
-router.post('/:webtechId', createwebTechTopic);
-router.post('/:webtechId/topics/:topicId', createwebTechSubTopic);
+router.post(
+  '/',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', webTechSchema),
+  createWebTech
+);
+
+router.post(
+  '/:webtechId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', webTechTopicSchema),
+  createWebTechTopic
+);
+
+router.post(
+  '/:webtechId/topics/:topicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('POST', webTechTopicSchema),
+  createWebTechSubTopic
+);
 
 // Routes for PUT requests
-router.put('/', updateWebTechs);
-router.put('/:webtechId', updateWebTech);
-router.put('/:webtechId/topics', updateWebTechTopics);
-router.put('/:webtechId/topics/:topicId', updateWebTechTopic);
-router.put('/:webtechId/topics/:topicId/subtopics', updateWebTechSubTopics);
+router.put(
+  '/:webtechId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', webTechSchema),
+  updateWebTech
+);
+
+router.put(
+  '/:webtechId/topics/:topicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', webTechTopicSchema),
+  updateWebTechTopic
+);
+
 router.put(
   '/:webtechId/topics/:topicId/subtopics/:subtopicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin', 'Moderator']),
+  validateInputs('PUT', webTechTopicSchema),
   updateWebTechSubTopic
 );
 
 // Routes for DELETE requests
-router.delete('/', deleteWebTechs);
-router.delete('/:webtechId', deleteWebTech);
-router.delete('/:webtechId/topics', deleteWebTechTopics);
-router.delete('/:webtechId/topics/:topicId', deleteWebTechTopic);
-router.delete('/:webtechId/topics/:topicId/subtopics', deleteWebTechSubTopics);
+router.delete(
+  '/:webtechId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin']),
+  deleteWebTech
+);
+
+router.delete(
+  '/:webtechId/topics/:topicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin']),
+  deleteWebTechTopic
+);
+
 router.delete(
   '/:webtechId/topics/:topicId/subtopics/:subtopicId',
+  isAuthenticated,
+  isAuthorized(['SuperAdmin', 'Admin']),
   deleteWebTechSubTopic
 );
 

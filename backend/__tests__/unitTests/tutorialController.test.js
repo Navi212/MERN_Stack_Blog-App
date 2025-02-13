@@ -210,7 +210,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId');
+      expect(error.message).toBe('Invalid/Missing tutorialId');
     });
   });
 
@@ -227,7 +227,7 @@ describe('Tutorial', () => {
       const [error] = next.mock.calls[0];
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid/No tutorialId');
+      expect(error.message).toBe('Invalid/Missing tutorialId');
     });
 
     test('Should get the topics for a single tutorial', async () => {
@@ -280,7 +280,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid/No tutorialId or topicId');
+      expect(error.message).toBe('Invalid/Missing tutorialId/topicId');
     });
 
     test('Should get a single topic for a tutorial', async () => {
@@ -328,7 +328,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId or topicId');
+      expect(error.message).toBe('Invalid/Missing tutorialId/topicId');
     });
 
     test('Should get all subtopics of a topic', async () => {
@@ -380,7 +380,9 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid/No tutorialId/topicId/subtopicId');
+      expect(error.message).toBe(
+        'Invalid/Missing tutorialId/topicId/subtopicId'
+      );
     });
 
     test('Should get a single subtopic of a tutorial topic', async () => {
@@ -434,7 +436,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Tutorial name or description missing');
+      expect(error.message).toBe('Invalid/Missing Tutorial name/description');
     });
 
     test('Should create a tutorial', async () => {
@@ -487,7 +489,7 @@ describe('Tutorial', () => {
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
       expect(error.message).toBe(
-        'Tutorial topic name/description/content missing'
+        'Invalid/Missing Tutorial topic name/description/content'
       );
     });
 
@@ -570,7 +572,7 @@ describe('Tutorial', () => {
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
       expect(error.message).toBe(
-        'Tutorial subtopic name/description/content missing'
+        'Invalid/Missing Tutorial subtopic name/description/content'
       );
     });
 
@@ -579,8 +581,9 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
-      jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(null);
-      jest.spyOn(TutorialTopic, 'findById').mockResolvedValueOnce(null);
+      // jest.spyOn(Tutorial, 'findById').mockResolvedValueOnce(null);
+      // jest.spyOn(TutorialTopic, 'findById').mockResolvedValueOnce(null);
+      jest.spyOn(TutorialTopic, 'findOne').mockResolvedValueOnce(null);
 
       await createTutorialSubTopic(mockReq, mockRes, next);
 
@@ -596,12 +599,19 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      // jest
+      //   .spyOn(Tutorial, 'findById')
+      //   .mockResolvedValueOnce(mockReq.params.tutorialId);
+      // jest
+      //   .spyOn(TutorialTopic, 'findById')
+      //   .mockResolvedValueOnce(mockReq.params.topicId);
       jest
-        .spyOn(Tutorial, 'findById')
-        .mockResolvedValueOnce(mockReq.params.tutorialId);
-      jest
-        .spyOn(TutorialTopic, 'findById')
-        .mockResolvedValueOnce(mockReq.params.topicId);
+        .spyOn(TutorialTopic, 'findOne')
+        .mockResolvedValueOnce(
+          mockReq.params.topicId,
+          mockReq.params.tutorialId
+        );
+
       jest.spyOn(TutorialTopic, 'create').mockResolvedValueOnce(null);
 
       await createTutorialSubTopic(mockReq, mockRes, next);
@@ -616,12 +626,19 @@ describe('Tutorial', () => {
       const mockRes = mockResponse();
       const next = jest.fn();
 
+      // jest
+      //   .spyOn(Tutorial, 'findById')
+      //   .mockResolvedValueOnce(mockReq.params.tutorialId);
+      // jest
+      //   .spyOn(TutorialTopic, 'findById')
+      //   .mockResolvedValueOnce(mockReq.params.topicId);
       jest
-        .spyOn(Tutorial, 'findById')
-        .mockResolvedValueOnce(mockReq.params.tutorialId);
-      jest
-        .spyOn(TutorialTopic, 'findById')
-        .mockResolvedValueOnce(mockReq.params.topicId);
+        .spyOn(TutorialTopic, 'findOne')
+        .mockResolvedValueOnce(
+          mockReq.params.topicId,
+          mockReq.params.tutorialId
+        );
+
       jest
         .spyOn(TutorialTopic, 'create')
         .mockResolvedValueOnce(mockCreateSubtopic);
@@ -655,7 +672,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid/No tutorialId');
+      expect(error.message).toBe('Invalid/Missing tutorialId');
     });
 
     test('Should throw an error on update error', async () => {
@@ -712,7 +729,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid/No tutorialId/topicId');
+      expect(error.message).toBe('Invalid/Missing tutorialId/topicId');
     });
 
     test('Should throw an error if no tutorial found', async () => {
@@ -791,7 +808,9 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId/topicId/subtopicId');
+      expect(error.message).toBe(
+        'Invalid/Missing tutorialId/topicId/subtopicId'
+      );
     });
 
     test('Should throw an error when tutorial and topic doesnt exist', async () => {
@@ -870,7 +889,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId');
+      expect(error.message).toBe('Invalid/Missing tutorialId');
     });
 
     test('Should throw error on delete error', async () => {
@@ -922,7 +941,7 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId/topicId');
+      expect(error.message).toBe('Invalid/Missing tutorialId/topicId');
     });
 
     test('Should throw error when no tutorial found', async () => {
@@ -996,7 +1015,9 @@ describe('Tutorial', () => {
 
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(error.statusCode).toBe(400);
-      expect(error.message).toBe('Invalid tutorialId/topicId/subtopicId');
+      expect(error.message).toBe(
+        'Invalid/Missing tutorialId/topicId/subtopicId'
+      );
     });
 
     test('Should throw error when tutorial and topic doesnt exist', async () => {
